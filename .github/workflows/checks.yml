@@ -1,0 +1,35 @@
+name: Checks
+
+on:
+  push:
+    branches:
+      - '*'  # Run for every branch
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          # TODO Add rule to get all the dependencies
+          # make deps
+
+      - name: Check commit messages
+        run: |
+          git log -1 --pretty=%B | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert): .+' || (echo "Commit message does not follow Conventional Commits!" && exit 1)
+
+      - name: Check formatting
+        run: |
+          # TODO Add rule to format your source code
+          # make format
+          git diff --exit-code || (echo "Formatting issues detected!" && exit 1)
+
+      - name: Run linter
+        run: |
+          # TODO Add rule to run any linter
+          # make lint
+
