@@ -20,19 +20,22 @@ jobs:
 
       - name: Check commit messages
         run: |
-          set -e
-          success=1
-          for hash in $(git rev-list origin..HEAD); do
-            git log -1 --pretty=%s $hash \
-              | grep -qE '(^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)[!]{0,1}: .+)|(^Initial commit$)' \
-              || { git log -1 --pretty="%t %s" "$hash"; success=0; }
+          # Define the regular expression
+          REGEX='(^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)[!]{0,1}: .+)|(^Initial commit$)'
+          
+          # Get the commits SHAs in the PR by compairing the base
+          COMMITS=$(git log --pretty=format:"%h" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+
+          # Iterate for each commit and validate the message
+          for COMMIT in $COMMITS; do
+            MESSAGE=$(git log -1 --pretty=format:"%s" $COMMIT)
+            echo "Checking commit: $COMMIT - $MESSAGE"
+            if ! grep -qE "$REGEX" <<< "$MESSAGE"; then
+              echo "Error: El commit '$MESSAGE' no cumple con el formato de Conventional Commits."
+              exit 1
+            fi
           done
-          if [ "$success" -eq 0 ]; then
-            echo "error: some commit message does not match conventional commits"
-            echo "error: please check the above commits"
-            exit 1
-          fi
-          echo "title match conventional commits: success"
+          echo "Todos los commits cumplen con el formato de Conventional Commits."
 
       - name: Check formatting
         run: |
