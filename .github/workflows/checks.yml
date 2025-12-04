@@ -20,7 +20,18 @@ jobs:
 
       - name: Check commit messages
         run: |
-          git log -1 --pretty=%B | grep -qE '(^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)[!]{0,1}: .+)|(^Initial commit$)' || (echo "Commit message does not follow Conventional Commits!" && exit 1)
+          set -e
+          success=1
+          for hash in $(git rev-list origin..HEAD); do
+            git log -1 --pretty=%s $hash \
+              | grep -qE '(^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)[!]{0,1}: .+)|(^Initial commit$)' \
+              || { git log -1 --pretty="%t %s" "$hash"; success=0; }
+          done
+          if [ "$success" -eq 0 ]; then
+            echo "error: some commit message does not match conventional commits"
+            echo "error: please check the above commits"
+            exit 1
+          fi
 
       - name: Check formatting
         run: |
