@@ -20,7 +20,7 @@ jobs:
 
       - name: Check commit messages
         run: |
-          git log -1 --pretty=%B | grep -qE '(^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert): .+)|(^Initial commit$)' || (echo "Commit message does not follow Conventional Commits!" && exit 1)
+          git log -1 --pretty=%B | grep -qE '(^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)[!]{0,1}: .+)|(^Initial commit$)' || (echo "Commit message does not follow Conventional Commits!" && exit 1)
 
       - name: Check formatting
         run: |
