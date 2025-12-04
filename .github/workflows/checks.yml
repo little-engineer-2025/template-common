@@ -32,6 +32,7 @@ jobs:
             echo "error: please check the above commits"
             exit 1
           fi
+          echo "title match conventional commits: success"
 
       - name: Check formatting
         run: |
