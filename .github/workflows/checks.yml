@@ -7,11 +7,14 @@ on:
 
 jobs:
   check:
+    permissions:
+      contents: read
+      pull-requests: read
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -19,6 +22,8 @@ jobs:
           # make deps
 
       - name: Check commit messages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Define the regular expression
           REGEX='(^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)[!]{0,1}: .+)|(^Initial commit$)'
