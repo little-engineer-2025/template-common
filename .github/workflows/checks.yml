@@ -7,11 +7,14 @@ on:
 
 jobs:
   check:
+    permissions:
+      contents: read
+      pull-requests: read
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -19,8 +22,25 @@ jobs:
           # make deps
 
       - name: Check commit messages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git log -1 --pretty=%B | grep -qE '(^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)[!]{0,1}: .+)|(^Initial commit$)' || (echo "Commit message does not follow Conventional Commits!" && exit 1)
+          # Define the regular expression
+          REGEX='(^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)[!]{0,1}: .+)|(^Initial commit$)'
+          
+          # Get the commits SHAs in the PR by compairing the base
+          COMMITS=$(git log --pretty=format:"%h" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+
+          # Iterate for each commit and validate the message
+          for COMMIT in $COMMITS; do
+            MESSAGE=$(git log -1 --pretty=format:"%s" $COMMIT)
+            echo "Checking commit: $COMMIT - $MESSAGE"
+            if ! grep -qE "$REGEX" <<< "$MESSAGE"; then
+              echo "Error: El commit '$MESSAGE' no cumple con el formato de Conventional Commits."
+              exit 1
+            fi
+          done
+          echo "Todos los commits cumplen con el formato de Conventional Commits."
 
       - name: Check formatting
         run: |
