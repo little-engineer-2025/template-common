@@ -1,3 +1,7 @@
+> WARNING: This repository is archived
+>
+> Follow up at: https://github.com/avisiedo/template-common
+
 # TODO Update README.md
 
 Common template
